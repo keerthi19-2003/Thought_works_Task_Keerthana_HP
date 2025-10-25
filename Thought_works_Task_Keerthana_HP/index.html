@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html ng-app="quizApp">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quiz App</title>
+    <link rel="stylesheet" href="css/welcome.css">
+    <link rel="stylesheet" href="css/quiz.css">
+    <link rel="stylesheet" href="css/modern-results.css">
+    <link rel="stylesheet" href="css/review.css">
+    <link rel="stylesheet" href="css/input.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.8.2/angular.min.js"></script>
+    <script src="js/app.js"></script>
+</head>
+<body ng-controller="QuizController">
+    <div class="container">
+        <div class="welcome-screen" ng-show="currentState === 'welcome'">
+            <div class="welcome-content">
+                <div class="quiz-logo">
+                    <svg viewBox="0 0 24 24" class="quiz-icon">
+                        <defs>
+                            <linearGradient id="quizGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                                <stop offset="0%" style="stop-color:#c935bc"/>
+                                <stop offset="100%" style="stop-color:#8a2584"/>
+                            </linearGradient>
+                        </defs>
+                        <g fill="url(#quizGradient)">
+                            <!-- Question Mark -->
+                            <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8z"/>
+                            <path d="M12 6c-1.93 0-3.5 1.57-3.5 3.5h1.75c0-.97.78-1.75 1.75-1.75s1.75.78 1.75 1.75c0 1.1-.9 2-2 2v2h1.5v-1.15c1.95-.37 3.25-1.87 3.25-3.85 0-2.21-1.79-4-4-4z"/>
+                            <circle cx="12" cy="17" r="1"/>
+                            <!-- Lightbulb Rays -->
+                            <path d="M11 3.1L9.5 4.6l1.4 1.4L12.4 4.5z"/>
+                            <path d="M3.1 11L4.6 12.5l1.4-1.4L4.5 9.6z"/>
+                            <path d="M20.9 11l-1.5 1.5-1.4-1.4 1.5-1.5z"/>
+                            <path d="M13 3.1l1.5 1.5-1.4 1.4-1.5-1.5z"/>
+                        </g>
+                    </svg>
+                </div>
+                <h1>Welcome to<br><span class="highlight">THOUGHT QUIZZ</span></h1>
+                <p class="welcome-description">There will be 3 Sets of Questions,You Will be Alloted a Random Set When you Start the quiz</p>
+                <div class="input-group">
+                    <div class="fancy-input">
+                        <input type="text" ng-model="userName" required>
+                        <label>Enter your name</label>
+                        <div class="input-line"></div>
+                    </div>
+                    <button class="start-button" ng-click="startQuiz()" ng-disabled="!userName">
+                        <span class="button-text">Start Quizzz</span>
+                        <svg class="arrow-icon" viewBox="0 0 24 24">
+                            <path d="M12 4l-1.41 1.41L16.17 11H4v2h12.17l-5.58 5.59L12 20l8-8z"/>
+                        </svg>
+                    </button>
+                </div>
+                <div class="quiz-features">
+                    <div class="feature">
+                        <svg viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>
+                        <span>10 Challenging Questions</span>
+                    </div>
+                    <div class="feature">
+                        <svg viewBox="0 0 24 24"><path d="M13 2.05v3.03c3.39.49 6 3.39 6 6.92 0 .9-.18 1.75-.5 2.54l2.54 1.27c.56-1.24.88-2.62.88-4.07 0-5.18-3.95-9.45-8.92-9.99zM12 19c-3.87 0-7-3.13-7-7 0-3.53 2.61-6.43 6-6.92V2.05C5.94 2.49 2 6.91 2 12c0 5.52 4.47 10 9.99 10v-3z"/></svg>
+                        <span>Real-time Progress</span>
+                    </div>
+                    <div class="feature">
+                        <svg viewBox="0 0 24 24"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-7 2h6v6h-2V7h-4V5zm-6 6h2v4h4v2H6v-6z"/></svg>
+                        <span>Detailed Review</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="quiz-container" ng-show="currentState === 'quiz'">
+            <div class="quiz-main-content">
+                <div class="quiz-header-section">
+                    <div class="set-info">
+                        <div class="quiz-icon">
+                            <svg viewBox="0 0 24 24">
+                                <path d="M9 21c0 .55.45 1 1 1h4c.55 0 1-.45 1-1v-1H9v1zm3-19C8.14 2 5 5.14 5 9c0 2.38 1.19 4.47 3 5.74V17c0 .55.45 1 1 1h6c.55 0 1-.45 1-1v-2.26c1.81-1.27 3-3.36 3-5.74 0-3.86-3.14-7-7-7zm2.85 11.1l-.85.6V16h-4v-2.3l-.85-.6C7.8 12.16 7 10.63 7 9c0-2.76 2.24-5 5-5s5 2.24 5 5c0 1.63-.8 3.16-2.15 4.1z"/>
+                            </svg>
+                        </div>
+                        <div class="set-details">
+                            <h2>{{getQuizSetName()}}</h2>
+                            <p class="question-count">Question {{currentQuestion + 1}} of 10</p>
+                        </div>
+                    </div>
+                    <div class="progress-outer">
+                        <div class="progress-animated-bar">
+                            <div class="progress-animated-fill" ng-style="{'width': getProgressPercentage() + '%'}"></div>
+                        </div>
+                        <div class="progress-label">{{getAnsweredCount()}} / 10 answered</div>
+                    </div>
+                </div>
+
+                <div class="question-container">
+                    <h3>{{getCurrentQuestion().question}}</h3>
+                    <div class="options">
+                        <label class="option" ng-repeat="option in getCurrentQuestion().options track by $index">
+                            <input type="radio" 
+                                   ng-model="userAnswers[currentQuestion]" 
+                                   ng-value="$index"
+                                   name="question{{currentQuestion}}">
+                            <div class="option-content">
+                                <span class="option-text">{{option}}</span>
+                                <span class="radio-custom"></span>
+                            </div>
+                        </label>
+                    </div>
+                </div>
+
+                <div class="navigation-buttons">
+                    <button class="nav-button prev" ng-click="previousQuestion()" ng-disabled="currentQuestion === 0">
+                        <svg viewBox="0 0 24 24">
+                            <path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/>
+                        </svg>
+                        Previous
+                    </button>
+                    <button class="nav-button next" ng-click="nextQuestion()" ng-show="currentQuestion < 9">
+                        Next
+                        <svg viewBox="0 0 24 24">
+                            <path d="M12 4l-1.41 1.41L16.17 11H4v2h12.17l-5.58 5.59L12 20l8-8z"/>
+                        </svg>
+                    </button>
+                    <button class="nav-button submit" ng-click="submitQuiz()" ng-show="currentQuestion === 9">
+                        Submit Quiz
+                        <svg viewBox="0 0 24 24">
+                            <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+            
+            <div class="question-navigator">
+                <h3 class="navigator-title">Question Navigator</h3>
+                <div class="question-grid">
+                    <div class="question-item" 
+                         ng-repeat="n in [0,1,2,3,4,5,6,7,8,9]"
+                         ng-class="{
+                             'current': currentQuestion === n,
+                             'answered': userAnswers[n] !== null && userAnswers[n] !== -1,
+                             'skipped': userAnswers[n] === -1,
+                             'not-visited': !visitedQuestions[n]
+                         }"
+                         ng-click="goToQuestion(n)">
+                        <span class="question-number">{{n + 1}}</span>
+                        <span class="question-status">
+                            <svg class="status-icon" viewBox="0 0 24 24" ng-if="userAnswers[n] !== null && userAnswers[n] !== -1">
+                                <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+                            </svg>
+                            <svg class="status-icon" viewBox="0 0 24 24" ng-if="userAnswers[n] === -1">
+                                <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/>
+                            </svg>
+                        </span>
+                    </div>
+                </div>
+                <div class="navigator-legend">
+                    <div class="legend-item">
+                        <div class="legend-dot answered">
+                            <svg viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>
+                        </div>
+                        <span>Answered</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-dot skipped">
+                            <svg viewBox="0 0 24 24"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+                        </div>
+                        <span>Skipped</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-dot not-visited"></div>
+                        <span>Not Visited</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="results-screen modern" ng-show="currentState === 'results'">
+            <div class="results-card modern-card">
+                <div class="circle-progress-container">
+                    <svg class="circle-progress" viewBox="0 0 140 140">
+                        <defs>
+                            <linearGradient id="blueGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+                                <stop offset="0%" style="stop-color:#60a5fa;stop-opacity:1" />
+                                <stop offset="100%" style="stop-color:#3b82f6;stop-opacity:1" />
+                            </linearGradient>
+                        </defs>
+                        <circle class="circle-bg" cx="70" cy="70" r="62"/>
+                        <circle class="circle-progress-path" 
+                                cx="70" cy="70" r="62"
+                                ng-style="{'stroke-dashoffset': 389.557 * (1 - animatedScore/10)}"/>
+                        <text class="score-text" x="70" y="70">{{animatedScore}}</text>
+                    </svg>
+                </div>
+                
+                <div class="performance-grade" ng-class="{'excellent': animatedScore >= 9, 'good': animatedScore >= 7 && animatedScore < 9, 'average': animatedScore >= 5 && animatedScore < 7, 'needs-improvement': animatedScore < 5}">
+                    {{animatedScore >= 9 ? 'Excellent!' : 
+                      animatedScore >= 7 ? 'Good Job!' :
+                      animatedScore >= 5 ? 'Keep Practicing!' :
+                      animatedScore >= 1 ? 'Work Hard!' : 'Try Again!'}}
+                </div>
+
+                <div class="results-content">
+                    <div class="result-detail">
+                        <span class="detail-label">Name</span>
+                        <span class="detail-value">{{userName}}</span>
+                    </div>
+                    <div class="result-detail">
+                        <span class="detail-label">Quiz Set</span>
+                        <span class="detail-value">{{getQuizSetName()}}</span>
+                    </div>
+                </div>
+
+                <div class="result-actions">
+                    <button class="action-button review-btn" ng-click="reviewAnswers()">
+                        <div class="button-content">
+                            <div class="button-icon">
+                                <svg viewBox="0 0 24 24">
+                                    <path d="M11 7h2v2h-2zm0 4h2v6h-2zm1-9C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8z"/>
+                                </svg>
+                            </div>
+                            <div class="button-text">
+                                <span class="button-title">Review Answers</span>
+                                <span class="button-subtitle">Check your responses</span>
+                            </div>
+                        </div>
+                        <div class="button-arrow">
+                            <svg viewBox="0 0 24 24">
+                                <path d="M12 4l-1.41 1.41L16.17 11H4v2h12.17l-5.58 5.59L12 20l8-8z"/>
+                            </svg>
+                        </div>
+                    </button>
+                    <button class="action-button quit-btn" ng-click="restartQuiz()">
+                        <div class="button-content">
+                            <div class="button-icon">
+                                <svg viewBox="0 0 24 24">
+                                    <path d="M17.65 6.35A7.958 7.958 0 0012 4c-4.42 0-7.99 3.58-7.99 8s3.57 8 7.99 8c3.73 0 6.84-2.55 7.73-6h-2.08A5.99 5.99 0 0112 18c-3.31 0-6-2.69-6-6s2.69-6 6-6c1.66 0 3.14.69 4.22 1.78L13 11h7V4l-2.35 2.35z"/>
+                                </svg>
+                            </div>
+                            <div class="button-text">
+                                <span class="button-title">Try Another Quiz</span>
+                                <span class="button-subtitle">Start fresh with new questions</span>
+                            </div>
+                        </div>
+                        <div class="button-arrow">
+                            <svg viewBox="0 0 24 24">
+                                <path d="M12 4l-1.41 1.41L16.17 11H4v2h12.17l-5.58 5.59L12 20l8-8z"/>
+                            </svg>
+                        </div>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <div class="review-screen" ng-show="currentState === 'review'">
+            <div class="review-container">
+                <h2>Review Your Answers</h2>
+                <div class="review-questions">
+                    <div class="review-question" 
+                         ng-repeat="question in quizSets[selectedSet].questions"
+                         ng-class="{
+                             'question-correct': userAnswers[$index] === question.correct,
+                             'question-incorrect': userAnswers[$index] !== null && userAnswers[$index] !== -1 && userAnswers[$index] !== question.correct,
+                             'question-unattempted': userAnswers[$index] === null || userAnswers[$index] === -1
+                         }">
+                        <h3>Question {{$index + 1}}</h3>
+                        <p class="question-text">{{question.question}}</p>
+                        <div class="review-options">
+                            <div class="review-option" 
+                                 ng-repeat="option in question.options"
+                                 ng-class="{
+                                     'correct': $index === question.correct,
+                                     'incorrect': userAnswers[$parent.$index] === $index && $index !== question.correct,
+                                     'selected': userAnswers[$parent.$index] === $index
+                                 }">
+                                {{option}}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <button class="modern-button" ng-click="restartQuiz()">
+                    <span class="button-content">
+                        <svg class="restart-icon" viewBox="0 0 24 24">
+                            <path d="M17.65 6.35A7.958 7.958 0 0012 4c-4.42 0-7.99 3.58-7.99 8s3.57 8 7.99 8c3.73 0 6.84-2.55 7.73-6h-2.08A5.99 5.99 0 0112 18c-3.31 0-6-2.69-6-6s2.69-6 6-6c1.66 0 3.14.69 4.22 1.78L13 11h7V4l-2.35 2.35z"/>
+                        </svg>
+                        Try Another Quiz
+                    </span>
+                </button>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
